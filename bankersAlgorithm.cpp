@@ -1,99 +1,94 @@
+// Banker's Algorithm
 #include <iostream>
 #include <fstream>
-#include <vector>
-
 using namespace std;
 
-// Function to check if the system is in a safe state
-bool isSafeState(const vector<vector<int>>& allocation, const vector<vector<int>>& max, const vector<int>& available) {
-    int numProcesses = allocation.size();
-    int numResources = allocation[0].size();
+int main()
+{
+    // P0, P1, P2, P3, P4
+    int n, m, i, j, k;
+    n = 5; // Number of processes
+    m = 3; // Number of resources
+    int alloc[5][3]; // Allocation Matrix
+    int max[5][3]; // MAX Matrix
+    int avail[3]; // Available Resources
 
-    vector<int> work = available;
-    vector<bool> finish(numProcesses, false);
-    vector<int> safeSequence;
+    // Read input from file
+    ifstream inputFile("input.txt");
+    if (inputFile.is_open()) {
+        // Read allocation matrix
+        for (i = 0; i < n; i++) {
+            for (j = 0; j < m; j++) {
+                inputFile >> alloc[i][j];
+            }
+        }
 
-    int count = 0;
-    while (count < numProcesses) {
-        bool found = false;
-        for (int i = 0; i < numProcesses; i++) {
-            if (!finish[i]) {
-                bool canAllocate = true;
-                for (int j = 0; j < numResources; j++) {
-                    if (max[i][j] - allocation[i][j] > work[j]) {
-                        canAllocate = false;
+        // Read max matrix
+        for (i = 0; i < n; i++) {
+            for (j = 0; j < m; j++) {
+                inputFile >> max[i][j];
+            }
+        }
+
+        // Read available resources
+        for (j = 0; j < m; j++) {
+            inputFile >> avail[j];
+        }
+
+        inputFile.close();
+    } else {
+        cout << "Unable to open input file." << endl;
+        return 1;
+    }
+
+    int f[n], ans[n], ind = 0;
+    for (k = 0; k < n; k++) {
+        f[k] = 0;
+    }
+    int need[n][m];
+    for (i = 0; i < n; i++) {
+        for (j = 0; j < m; j++)
+            need[i][j] = max[i][j] - alloc[i][j];
+    }
+    int y = 0;
+    for (k = 0; k < 5; k++) {
+        for (i = 0; i < n; i++) {
+            if (f[i] == 0) {
+
+                int flag = 0;
+                for (j = 0; j < m; j++) {
+                    if (need[i][j] > avail[j]) {
+                        flag = 1;
                         break;
                     }
                 }
-                if (canAllocate) {
-                    for (int j = 0; j < numResources; j++) {
-                        work[j] += allocation[i][j];
-                    }
-                    safeSequence.push_back(i);
-                    finish[i] = true;
-                    found = true;
-                    count++;
+
+                if (flag == 0) {
+                    ans[ind++] = i;
+                    for (y = 0; y < m; y++)
+                        avail[y] += alloc[i][y];
+                    f[i] = 1;
                 }
             }
         }
-        if (!found) {
+    }
+
+    int flag = 1;
+
+    // To check if sequence is safe or not
+    for (int i = 0; i < n; i++) {
+        if (f[i] == 0) {
+            flag = 0;
+            cout << "The given sequence is not safe";
             break;
         }
     }
 
-    return count == numProcesses;
-}
-
-int main() {
-    // Read input from a file
-    ifstream inputFile("input.txt");
-    if (!inputFile) {
-        cout << "Failed to open input file." << endl;
-        return 1;
+    if (flag == 1) {
+        cout << "Following is the SAFE Sequence" << endl;
+        for (i = 0; i < n - 1; i++)
+            cout << " P" << ans[i] << " ->";
+        cout << " P" << ans[n - 1] << endl;
     }
 
-    int numProcesses, numResources;
-    inputFile >> numProcesses >> numResources;
-
-    vector<vector<int>> allocation(numProcesses, vector<int>(numResources));
-    vector<vector<int>> max(numProcesses, vector<int>(numResources));
-    vector<int> available(numResources);
-
-    for (int i = 0; i < numProcesses; i++) {
-        for (int j = 0; j < numResources; j++) {
-            inputFile >> allocation[i][j];
-        }
-    }
-
-    for (int i = 0; i < numProcesses; i++) {
-        for (int j = 0; j < numResources; j++) {
-            inputFile >> max[i][j];
-        }
-    }
-
-    for (int i = 0; i < numResources; i++) {
-        inputFile >> available[i];
-    }
-
-    inputFile.close();
-
-    // Check if the system is in a safe state
-    vector<int> safeSequence;
-
-    if (isSafeState(allocation, max, available)) {
-        cout << "The system is in a safe state." << endl;
-        cout << "Safe sequence: ";
-        for (int i = 0; i < numProcesses; i++) {
-            safeSequence.push_back(i); // Add the process index to the safeSequence vector
-            cout << "P" << safeSequence[i];
-            if (i != numProcesses - 1) {
-                cout << " -> ";
-            }
-        }
-        cout << endl;
-    } else {
-        cout << "The system is not in a safe state." << endl;
-    }
-
-    return 0;
 }
