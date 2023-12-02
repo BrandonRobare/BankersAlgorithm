@@ -22,4 +22,21 @@ The `input.txt` file should contain the following:
 - The max matrix: This should be a series of lines, each containing the maximum resources each process may need.
 - The available resources: This should be a single line containing the resources available.
 
-Here is an example of how the `input.txt` file could be formatted:
+Example input file:
+
+0 1 0
+2 0 0
+3 0 2
+2 1 1
+0 0 2
+7 5 3
+3 2 2
+9 0 2
+2 2 2
+4 3 3
+3 3 2
+
+Output:
+
+Following is the SAFE Sequence
+ P1 -> P3 -> P4 -> P0 -> P2
